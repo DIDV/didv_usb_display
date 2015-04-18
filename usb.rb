@@ -4,7 +4,7 @@
 
 require "serialport"
 require "pry"
-
+require "timers"
 module DIDV
   class Serial_communication
 
@@ -12,6 +12,13 @@ module DIDV
     def initialize(baud_rate=57600, data_bits=8, stop_bits=1, parity=SerialPort::NONE)
       port_str = "/dev/ttyACM1"  #may be different for you
       @sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
+      timer = Timers::Group.new
+      thread = Thread.new do
+        timer.every(0.50){check_data}
+        loop do
+          timer.wait
+        end
+      end
     end
 
     def packetize_data data
@@ -32,10 +39,10 @@ module DIDV
       # this first version just gets data forever
       puts "Getting getting data..."
       if (times)
-        times.times { puts sp.getc }
+        times.times { check_data }
       else
         #TODO pensar na recepção
-        loop { foward_received_data(sp.gets) }
+        loop { check_data }
       end
     end
 
@@ -44,8 +51,12 @@ module DIDV
       get_data data.size
     end
 
-    def foward_received_data data
+    def foward_data data
       puts "#{data}" #modify to send data to somewhere that it makes sense
+    end
+
+    def check_data
+      foward_data sp.getc
     end
 
   end
@@ -54,6 +65,5 @@ module DIDV
   (0..10).each {|data| a[data] = (data).chr}
   serial.packetize_data a
   binding.pry
-
 
 end
