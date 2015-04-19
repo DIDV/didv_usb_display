@@ -4,6 +4,7 @@
 
 require "serialport"
 require "pry"
+require "timeout"
 module DIDV
   class Serial_communication
 
@@ -39,25 +40,38 @@ module DIDV
       end
     end
 
-    def send_and_get_data data
-      send_data data
-      get_data data.size
-    end
+    def get_data_with_timeout times=nil
+      require 'timeout'
+      begin
+        Timeout.timeout(1) do
+        get_data times
+      end
 
-    def foward_data data
-      puts "#{data}" #modify to send data to somewhere that it makes sense
-    end
-
-    def check_data
-      foward_data sp.getc
+    rescue Timeout::Error
+      puts 'Sem dados para receber'
     end
 
   end
-  #Just for tests
-  serial = Serial_communication.new
-  a = Array.new #test array
-  (0..10).each {|data| a[data] = (data).chr}
-  serial.send_data a
-  binding.pry
+
+  def send_and_get_data data
+    send_data data
+    get_data_with_timeout data.size
+  end
+
+  def foward_data data
+    puts "#{data}" #modify to send data to somewhere that it makes sense
+  end
+
+  def check_data
+    foward_data sp.getc
+  end
+
+end
+#Just for tests
+serial = Serial_communication.new
+a = Array.new #test array
+(0..10).each {|data| a[data] = (data).chr}
+serial.send_data a
+binding.pry
 end
 #binding.pry
