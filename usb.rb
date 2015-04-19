@@ -4,7 +4,6 @@
 
 require "serialport"
 require "pry"
-require "timers"
 module DIDV
   class Serial_communication
 
@@ -12,13 +11,6 @@ module DIDV
     def initialize(baud_rate=57600, data_bits=8, stop_bits=1, parity=SerialPort::NONE)
       port_str = "/dev/ttyACM1"  #may be different for you
       @sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-      timer = Timers::Group.new
-      thread = Thread.new do
-        timer.every(0.50){check_data}
-        loop do
-          timer.wait
-        end
-      end
     end
 
     def packetize_data data
@@ -26,11 +18,12 @@ module DIDV
       data_to_send[0] = 0x62.chr
       data_to_send[11] = 0x65.chr
       (1..10).each { |i| data_to_send[i] = data[i-1] }
-      send_and_get_data data_to_send
+      data_to_send
     end
 
     def send_data data
       puts "Sending '#{data}'..."
+      data = packetize_data data
       data.each { |c| sp.putc c }
       puts "Data sent :'#{data}'"
     end
@@ -60,10 +53,11 @@ module DIDV
     end
 
   end
+  #Just for tests
   serial = Serial_communication.new
   a = Array.new #test array
   (0..10).each {|data| a[data] = (data).chr}
-  serial.packetize_data a
+  serial.send_data a
   binding.pry
-
 end
+#binding.pry
