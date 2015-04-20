@@ -8,23 +8,23 @@ require "timeout"
 module DIDV
   class Serial_communication
 
-    attr_accessor :sp
+    attr_accessor :sp, :send_error, :last_sent_packet
     def initialize(baud_rate=57600, data_bits=8, stop_bits=1, parity=SerialPort::NONE)
-      port_str = "/dev/ttyACM1"  #may be different for you
+      port_str = "/dev/ttyACM0"  #may be different for you
       @sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
     end
 
     def packetize_data data
       data_to_send = Array.new
-      data_to_send[0] = 0x62.chr
-      data_to_send[11] = 0x65.chr
+      data_to_send[0] = 0x40.chr
+      data_to_send[11] = 0x43.chr
       (1..10).each { |i| data_to_send[i] = data[i-1] }
       data_to_send
     end
 
     def send_data data
       puts "Sending '#{data}'..."
-      data = packetize_data data
+      @last_sent_data = data
       data.each { |c| sp.putc c }
       puts "Data sent :'#{data}'"
     end
@@ -43,12 +43,12 @@ module DIDV
     def get_data_with_timeout times=nil
       require 'timeout'
       begin
-        Timeout.timeout(1) do
+        Timeout.timeout(2) do
         get_data times
       end
 
     rescue Timeout::Error
-      puts 'Sem dados para receber'
+      puts 'Sem mais dados para receber'
     end
 
   end
@@ -60,6 +60,11 @@ module DIDV
 
   def foward_data data
     puts "#{data}" #modify to send data to somewhere that it makes sense
+    if (data == 'E')
+      send_data @last_sent_data
+    elsif (data == 'N')
+      puts "erro durante a transmissão"
+    end
   end
 
   def check_data
@@ -68,10 +73,13 @@ module DIDV
 
 end
 #Just for tests
+#0x3f nivel logico alto
 serial = Serial_communication.new
 a = Array.new #test array
-(0..10).each {|data| a[data] = (data).chr}
-serial.send_data a
+(0..4).each {|data| a[data] = 0x00.chr}
+(5..10).each {|data| a[data]=0x3f.chr}
+a = serial.packetize_data a
+serial.send_and_get_data a
 binding.pry
 end
 #binding.pry
