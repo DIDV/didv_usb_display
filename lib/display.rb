@@ -48,45 +48,46 @@ module DIDV
     end
 
     def get_data_with_timeout times=nil
-      require 'timeout'
       begin
-        Timeout.timeout(2) do
-        get_data times
+        Timeout.timeout(2) { get_data times }
+      rescue Timeout::Error
+        puts 'Sem mais dados para receber'
       end
+    end
 
-    rescue Timeout::Error
-      puts 'Sem mais dados para receber'
+    def send_and_get_data data
+      send_data data
+      get_data_with_timeout data.size
+    end
+
+    def foward_data data
+      puts "#{data}" #modify to send data to somewhere that it makes sense
+      if (data == 'E')
+        send_data @last_sent_data
+      elsif (data == 'N')
+        puts "erro durante a transmissão"
+      end
+    end
+
+    def check_data
+      foward_data sp.getc
     end
 
   end
-
-  def send_and_get_data data
-    send_data data
-    get_data_with_timeout data.size
-  end
-
-  def foward_data data
-    puts "#{data}" #modify to send data to somewhere that it makes sense
-    if (data == 'E')
-      send_data @last_sent_data
-    elsif (data == 'N')
-      puts "erro durante a transmissão"
-    end
-  end
-
-  def check_data
-    foward_data sp.getc
-  end
-
 end
-#Just for tests
-#0x3f nivel logico alto
-serial = Serial_communication.new
-a = Array.new #test array
-(0..4).each {|data| a[data] = 0x00.chr}
-(5..10).each {|data| a[data]=0x3f.chr}
-a = serial.packetize_data a
-serial.send_and_get_data a
-binding.pry
+
+# Just for tests
+# 0x3f logic high state
+# in order to test, set ENV['DIDV'] to "test" by running:
+# ~ export DIDV=test
+
+if ENV['DIDV'] == "test"
+  puts "stating test"
+  serial = DIDV::Display.new
+  a = Array.new #test array
+  (0..4).each {|data| a[data] = 0x00.chr}
+  (5..10).each {|data| a[data]=0x3f.chr}
+  a = serial.packetize_data a
+  serial.send_and_get_data a
+  binding.pry
 end
-#binding.pry
