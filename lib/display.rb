@@ -5,13 +5,20 @@
 require "serialport"
 require "pry"
 require "timeout"
+
 module DIDV
-  class Serial_communication
+
+  class Display
 
     attr_accessor :sp, :send_error, :last_sent_packet
-    def initialize(baud_rate=57600, data_bits=8, stop_bits=1, parity=SerialPort::NONE)
-      port_str = "/dev/ttyACM0"  #may be different for you
-      @sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
+
+    # Although the serial device can be customized, we suggest it
+    # to be 'locked' to /dev/didv-display using a custom udev rule
+
+    def initialize (serial_device = "/dev/didv-display")
+      # since the serial variables are attached to the PIC configurations,
+      # it's unlikely it will be changed at instance creation time.
+      @sp = SerialPort.new(serial_device, 57600, 8, 1, SerialPort::NONE)
     end
 
     def packetize_data data
