@@ -1,1 +1,5 @@
-.ideia/
+.idea/
+.yardoc/
+doc/
+*.pdf
+*.lock

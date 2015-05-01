@@ -20,7 +20,9 @@ module DIDV
       # it's unlikely it will be changed at instance creation time.
       @sp = SerialPort.new(serial_device, 57600, 8, 1, SerialPort::NONE)
     end
-
+    #receives a packet and put it in the send format
+    #@param data[Array] of 10 chars
+    #@return [Array] An array of 12 positions, where first is '0x40' and the last is '0x43'
     def packetize_data data
       data_to_send = Array.new
       data_to_send[0] = 0x40.chr
@@ -36,15 +38,8 @@ module DIDV
       puts "Data sent :'#{data}'"
     end
 
-    def get_data times=nil
-      # this first version just gets data forever
-      puts "Getting getting data..."
-      if (times)
-        times.times { check_data }
-      else
-        #TODO pensar na recepção
-        loop { check_data }
-      end
+    def valid?(data)
+      data.size == 10
     end
 
     def get_data_with_timeout times=nil
@@ -58,6 +53,23 @@ module DIDV
     def send_and_get_data data
       send_data data
       get_data_with_timeout data.size
+    end
+
+  def send_hex data
+    data = packetize_data data
+    send_and_get_data data
+  end
+
+    private
+    #this first version just gets data forever
+    def get_data times=nil
+      puts "Getting getting data..."
+      if (times)
+        times.times { check_data }
+      else
+        #TODO pensar na recepção
+        loop { check_data }
+      end
     end
 
     def foward_data data
