@@ -3,9 +3,7 @@ require_relative '../lib/display'
 require 'eventmachine'
 
 module DIDV
-  class Display_EM_server < EventMachine::Connection
-
-  attr_accessor :display
+  module DisplayEMServer
 
     def post_init
       @display = Display.new
@@ -20,5 +18,6 @@ module DIDV
 end
 
 EventMachine.run do
-  EventMachine.start_server '127.0.0.1',9001,DIDV::display_EM_server
+  EventMachine.start_server '127.0.0.1',9002,DIDV::DisplayEMServer
+
 end
