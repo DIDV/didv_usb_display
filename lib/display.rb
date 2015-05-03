@@ -30,10 +30,24 @@ module DIDV
       puts "Data sent :'#{data}'"
     end
 
-    #Verifica se o dado entrado é valido, ou seja, é um array de 10 posições
+
+    def send_with_blink data
+      a = data.pop
+      data = packetize_data data
+      send_and_get_data data
+      send_and_get_data a
+    end
+
+    #Verifica se o dado entrado é valido para um conjunto da linha, ou seja, é um array de 10 posições
     #@param data[Array] of 10 chars
-    def valid?(data)
+    def complete_line?(data)
       data.size == 10
+    end
+
+    #Verifica se o dado entrado é valido para um conjunto da linha e um controle de blink, ou seja, é um array de 11 posições
+    #@param data[Array] of 11 chars
+    def blink?(data)
+        data.size == 11
     end
 
     #recebe dado da porta serial utilizando um timeout, para não ficar esperando eternamente uma respotas
