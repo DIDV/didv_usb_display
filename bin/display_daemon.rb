@@ -3,7 +3,7 @@ require_relative '../lib/display'
 require 'eventmachine'
 
 module DIDV
-
+  #modulo que server de servidor para daemon central enviar dados que serão enviados para a linha braile
   module DisplayDaemon
 
     def post_init
