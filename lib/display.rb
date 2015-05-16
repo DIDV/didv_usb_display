@@ -26,7 +26,7 @@ module DIDV
     def send_data data
       puts "Sending '#{data}'..."
       @last_sent_data = data
-      data.each { |c| sp.putc c }
+      data.chars.each { |c| sp.putc c }
       puts "Data sent :'#{data}'"
     end
 

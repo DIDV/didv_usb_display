@@ -12,7 +12,8 @@ module DIDV
     end
 
     def receive_data(input)
-      @display.send_hex input if @display.valid? input
+      @display.send_data(input) if @display.complete_line?(input)
+      @display.send_with_blink(input) if @display.blink?(input)
       send_data 'waiting'
     end
 
