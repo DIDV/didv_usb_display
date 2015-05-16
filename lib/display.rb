@@ -26,16 +26,17 @@ module DIDV
     def send_data data
       puts "Sending '#{data}'..."
       @last_sent_data = data
-      data.chars.each { |c| sp.putc c }
+      data.each { |c| sp.putc c }
       puts "Data sent :'#{data}'"
     end
 
 
     def send_with_blink data
-      a = data.pop
-      data = packetize_data data
-      send_and_get_data data
-      send_and_get_data a
+      data = data.chars if data.is_a? String
+      a = data[-1]
+      data = data[0..-2]
+      send_hex data
+      send_and_get_data a.chars
     end
 
     #Verifica se o dado entrado é valido para um conjunto da linha, ou seja, é um array de 10 posições
@@ -82,11 +83,8 @@ module DIDV
     #@param data[Array] of 10 chars
     #@return [Array] An array of 12 positions, where first is '0x40' and the last is '0x41'
     def packetize_data data
-      data_to_send = Array.new
-      data_to_send[0] = 0x40.chr
-      data_to_send[11] = 0x41.chr
-      (1..10).each { |i| data_to_send[i] = data[i-1] }
-      data_to_send
+      data = data.chars if data.is_a? String
+      data.unshift(0x40.chr).push(0x41.chr)
     end
 
 
