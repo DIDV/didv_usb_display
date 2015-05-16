@@ -3,3 +3,4 @@
 doc/
 *.pdf
 *.lock
+*.pid
