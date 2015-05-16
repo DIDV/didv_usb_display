@@ -104,7 +104,7 @@ module DIDV
       if (data == 'E')
         send_data @last_sent_data
       elsif (data == 'N')
-        puts "erro durante a transmissão"
+        puts "erro durante a transmissao"
       end
     end
 
