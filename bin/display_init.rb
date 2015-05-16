@@ -3,7 +3,9 @@ require 'daemons'
 script = "#{File.dirname(__FILE__)}/display_daemon.rb"
 options = {
   app_name: "display_daemon",
-  log_dir: "/home/didv",
+  dir_mode: :normal,
+  dir: "/home/didv/pid",
+  log_dir: "/home/didv/log",
   log_output: true
 }
 
